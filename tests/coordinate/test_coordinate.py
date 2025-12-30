@@ -1,10 +1,10 @@
 """Unit tests for the Coordinate, Point, and Vector classes."""
 
 import numpy as np
-from coordinate.coordinate import Coordinate, Point, Vector, transform_coordinate
-from coordinate.system import System
-from coordinate.types import CoordinateType
-from coordinate.transforms import translate2D, rotate2D, scale2D
+from relative.coordinate import Coordinate, Point, Vector, transform_coordinate
+from relative.system import System
+from relative.types import CoordinateType
+from relative.transforms import translate2D, rotate2D, scale2D
 
 
 class TestTransformCoordinate:

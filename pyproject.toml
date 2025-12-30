@@ -1,7 +1,7 @@
 [project]
-name = "coordinate"
+name = "relative"
 version = "0.1.0"
-description = "Add your description here"
+description = "A library for working with hierarchical coordinate systems and transformations"
 readme = "README.md"
 authors = [
     { name = "Manu Gira", email = "manu.gira@outlook.com" }
@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-coordinate = "coordinate:main"
+relative = "relative:main"
 
 [build-system]
 requires = ["uv_build>=0.9.13,<0.10.0"]
@@ -26,4 +26,4 @@ dev = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"src/coordinate/__init__.py" = ["F401"]  # Ignore `F401` (imported but unused)
+"src/relative/__init__.py" = ["F401"]  # Ignore `F401` (imported but unused)

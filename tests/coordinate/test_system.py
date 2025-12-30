@@ -1,8 +1,8 @@
 """Unit tests for the System class."""
 
 import numpy as np
-from coordinate.system import System, system_factory
-from coordinate.transforms import translate2D, rotate2D, scale2D, trs2D
+from relative.system import System, system_factory
+from relative.transforms import translate2D, rotate2D, scale2D, trs2D
 
 
 class TestSystemInit:
