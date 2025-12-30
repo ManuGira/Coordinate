@@ -1,7 +1,6 @@
 """Unit tests for transformation matrix functions."""
 
 import numpy as np
-import pytest
 from coordinate.transforms import translate2D, rotate2D, scale2D, trs2D
 
 

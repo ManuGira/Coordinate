@@ -1,11 +1,9 @@
 name: CI
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-  workflow_dispatch:
+  push:                    # Runs on every push to any branch
+  pull_request:            # Runs on every pull request
+  workflow_dispatch:       # Allows manual triggering
 
 jobs:
   test:

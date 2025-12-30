@@ -1,7 +1,6 @@
 """Unit tests for the System class."""
 
 import numpy as np
-import pytest
 from coordinate.system import System, system_factory
 from coordinate.transforms import translate2D, rotate2D, scale2D, trs2D
 
