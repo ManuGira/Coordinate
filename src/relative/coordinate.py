@@ -3,7 +3,7 @@
 from typing import Optional
 import numpy as np
 
-from .system import System
+from .frame import Frame
 from .types import CoordinateType
 
 
@@ -48,127 +48,127 @@ def transform_coordinate(transform: np.ndarray, coordinates: np.ndarray, coordin
 
 
 class Coordinate:
-    """Base class for representing coordinates (points or vectors) in a coordinate system.
+    """Base class for representing coordinates (points or vectors) in a coordinate frame.
     
-    Coordinates can be defined in any coordinate system and converted between systems.
+    Coordinates can be defined in any coordinate frame and converted between frames.
     The distinction between points and vectors is crucial:
     - Points: Represent positions, affected by all transformations including translation
     - Vectors: Represent directions/displacements, unaffected by translation
     
     Attributes:
         coordinate_type: CoordinateType.POINT or CoordinateType.VECTOR
-        local_coords: 2D numpy array [x, y] in the local coordinate system
-        system: The coordinate system this coordinate is defined in
+        local_coords: 2D numpy array [x, y] in the local coordinate frame
+        frame: The coordinate frame this coordinate is defined in
     
     Examples:
-        >>> system = System(transform=translate2D(5, 3))
-        >>> coord = Coordinate(CoordinateType.POINT, np.array([1, 2]), system)
-        >>> global_coord = coord.to_global()
+        >>> frame = Frame(transform=translate2D(5, 3))
+        >>> coord = Coordinate(CoordinateType.POINT, np.array([1, 2]), frame)
+        >>> absolute_coord = coord.to_absolute()
     """
 
-    def __init__(self, coordinate_type: CoordinateType, local_coords: np.ndarray, system: Optional[System] = None):
+    def __init__(self, coordinate_type: CoordinateType, local_coords: np.ndarray, frame: Optional[Frame] = None):
         """Initialize a coordinate.
         
         Args:
             coordinate_type: CoordinateType.POINT or CoordinateType.VECTOR
-            local_coords: 2D numpy array [x, y] in the local coordinate system
-            system: Coordinate system this coordinate is defined in.
-                   If None, uses global/identity system.
+            local_coords: 2D numpy array [x, y] in the local coordinate frame
+            frame: Coordinate frame this coordinate is defined in.
+                   If None, uses absolute/identity frame.
         """
         self.coordinate_type = coordinate_type
         self.local_coords = local_coords
-        self.system = system if system is not None else System()
+        self.frame = frame if frame is not None else Frame()
 
-    def to_global(self) -> 'Coordinate':
-        """Converts this coordinate to global (identity) coordinate system.
+    def to_absolute(self) -> 'Coordinate':
+        """Converts this coordinate to absolute (identity) coordinate frame.
         
-        Applies the cumulative transformation from this coordinate's system through
-        all parent systems to express the coordinate in global space.
+        Applies the cumulative transformation from this coordinate's frame through
+        all parent frames to express the coordinate in absolute space.
         
         Returns:
-            New Coordinate with coordinates expressed in global system.
+            New Coordinate with coordinates expressed in absolute frame.
         
         Examples:
-            >>> root = System(transform=translate2D(10, 5))
-            >>> child = System(transform=translate2D(3, 2), parent=root)
-            >>> point = Point(np.array([1, 1]), system=child)
-            >>> global_point = point.to_global()
-            >>> global_point.local_coords  # Should be [14, 8]
+            >>> root = Frame(transform=translate2D(10, 5))
+            >>> child = Frame(transform=translate2D(3, 2), parent=root)
+            >>> point = Point(np.array([1, 1]), frame=child)
+            >>> absolute_point = point.to_absolute()
+            >>> absolute_point.local_coords  # Should be [14, 8]
         """
-        global_transform = self.system.global_transform()
-        global_coords = transform_coordinate(global_transform, self.local_coords, self.coordinate_type)
-        return Coordinate(local_coords=global_coords, coordinate_type=self.coordinate_type, system=None)
+        absolute_transform = self.frame.compute_absolute_transform()
+        absolute_coords = transform_coordinate(absolute_transform, self.local_coords, self.coordinate_type)
+        return Coordinate(local_coords=absolute_coords, coordinate_type=self.coordinate_type, frame=None)
         
-    def to_system(self, target_system: System) -> 'Coordinate':
-        """Converts this coordinate to a different coordinate system.
+    def to_frame(self, target_frame: Frame) -> 'Coordinate':
+        """Converts this coordinate to a different coordinate frame.
         
-        Transforms the coordinate from its current system to the target system,
+        Transforms the coordinate from its current frame to the target frame,
         properly handling the coordinate type (point vs vector) semantics.
         
         Args:
-            target_system: The destination coordinate system.
+            target_frame: The destination coordinate frame.
         
         Returns:
-            New Coordinate with coordinates expressed in the target system.
+            New Coordinate with coordinates expressed in the target frame.
         
         Examples:
-            >>> system_a = System(transform=translate2D(5, 0))
-            >>> system_b = System(transform=translate2D(0, 3))
-            >>> point_in_a = Point(np.array([0, 0]), system=system_a)
-            >>> point_in_b = point_in_a.to_system(system_b)
+            >>> frame_a = Frame(transform=translate2D(5, 0))
+            >>> frame_b = Frame(transform=translate2D(0, 3))
+            >>> point_in_a = Point(np.array([0, 0]), frame=frame_a)
+            >>> point_in_b = point_in_a.to_frame(frame_b)
             >>> point_in_b.local_coords  # Should be [5, -3]
         """
-        # Inverse transform from global to target system
-        convert_transform = self.system.compute_convert_transform(target_system)
+        # Inverse transform from absolute to target frame
+        convert_transform = self.frame.compute_relative_transform_to(target_frame)
         new_local_coords = transform_coordinate(convert_transform, self.local_coords, self.coordinate_type)
-        return Coordinate(local_coords=new_local_coords, coordinate_type=self.coordinate_type, system=target_system)
+        return Coordinate(local_coords=new_local_coords, coordinate_type=self.coordinate_type, frame=target_frame)
 
 
 class Point(Coordinate):
-    """Represents a point (position) in a coordinate system.
+    """Represents a point (position) in a coordinate frame.
     
     Points are affected by all transformations including translation, rotation, and scaling.
     Use this class to represent positions in space.
     
     Args:
         local_coords: 2D numpy array [x, y] representing the point position
-        system: Coordinate system this point is defined in. If None, uses global system.
+        frame: Coordinate frame this point is defined in. If None, uses absolute frame.
     
     Examples:
-        >>> # Point at origin in a translated system
-        >>> system = System(transform=translate2D(10, 5))
-        >>> point = Point(np.array([0, 0]), system=system)
-        >>> global_point = point.to_global()
-        >>> global_point.local_coords  # [10, 5] - affected by translation
+        >>> # Point at origin in a translated frame
+        >>> frame = Frame(transform=translate2D(10, 5))
+        >>> point = Point(np.array([0, 0]), frame=frame)
+        >>> absolute_point = point.to_absolute()
+        >>> absolute_point.local_coords  # [10, 5] - affected by translation
     """
     
-    def __init__(self, local_coords: np.ndarray, system: Optional[System] = None):
+    def __init__(self, local_coords: np.ndarray, frame: Optional[Frame] = None):
         super().__init__(
             coordinate_type=CoordinateType.POINT,
             local_coords=local_coords, 
-            system=system)
+            frame=frame)
 
 
 class Vector(Coordinate):
-    """Represents a vector (direction/displacement) in a coordinate system.
+    """Represents a vector (direction/displacement) in a coordinate frame.
     
     Vectors are NOT affected by translation, only by rotation and scaling.
     Use this class to represent directions, velocities, or relative displacements.
     
     Args:
         local_coords: 2D numpy array [x, y] representing the vector components
-        system: Coordinate system this vector is defined in. If None, uses global system.
+        frame: Coordinate frame this vector is defined in. If None, uses absolute frame.
     
     Examples:
-        >>> # Vector in a translated system
-        >>> system = System(transform=translate2D(10, 5))
-        >>> vector = Vector(np.array([1, 0]), system=system)
-        >>> global_vector = vector.to_global()
-        >>> global_vector.local_coords  # Still [1, 0] - unaffected by translation
+        >>> # Vector in a translated frame
+        >>> frame = Frame(transform=translate2D(10, 5))
+        >>> vector = Vector(np.array([1, 0]), frame=frame)
+        >>> absolute_vector = vector.to_absolute()
+        >>> absolute_vector.local_coords  # Still [1, 0] - unaffected by translation
     """
     
-    def __init__(self, local_coords: np.ndarray, system: Optional[System] = None):
+    def __init__(self, local_coords: np.ndarray, frame: Optional[Frame] = None):
         super().__init__(
             coordinate_type=CoordinateType.VECTOR,
             local_coords=local_coords, 
-            system=system)
+            frame=frame)
