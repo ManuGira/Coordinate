@@ -28,7 +28,8 @@ jobs:
         path: dist/
 
   publish-to-pypi:
-    needs: [build]
+    needs: [publish-to-testpypi]
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -49,7 +50,6 @@ jobs:
   publish-to-testpypi:
     needs: [build]
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
     environment:
       name: testpypi
       url: https://test.pypi.org/p/coordinatus
