@@ -1,7 +1,7 @@
 """Unit tests for transformation matrix functions."""
 
 import numpy as np
-from coordinatus.transforms import translate2D, rotate2D, scale2D, trs2D
+from coordinatus.transforms import translate2D, rotate2D, scale2D, shear2D, trs2D, trks2D
 
 
 class TestTranslate2D:
@@ -243,6 +243,166 @@ class TestTRS2D:
     def test_trs_matrix_properties(self):
         """Test that TRS matrix has correct properties for affine transformation."""
         M = trs2D(5, 3, np.pi / 4, 2, 1.5)
+        
+        # Bottom row should always be [0, 0, 1]
+        assert M[2, 0] == 0
+        assert M[2, 1] == 0
+        assert M[2, 2] == 1
+        
+        # Shape should be 3x3
+        assert M.shape == (3, 3)
+
+
+class TestShear2D:
+    """Tests for the shear2D function."""
+
+    def test_shear_identity(self):
+        """Test shear matrix with zero shear."""
+        K = shear2D(0, 0)
+        expected = np.eye(3)
+        np.testing.assert_array_almost_equal(K, expected)
+
+    def test_shear_x_only(self):
+        """Test shear in x direction only."""
+        K = shear2D(0.5, 0)
+        expected = np.array([[1, 0.5, 0],
+                            [0, 1,   0],
+                            [0, 0,   1]])
+        np.testing.assert_array_almost_equal(K, expected)
+
+    def test_shear_y_only(self):
+        """Test shear in y direction only."""
+        K = shear2D(0, 0.5)
+        expected = np.array([[1,   0, 0],
+                            [0.5, 1, 0],
+                            [0,   0, 1]])
+        np.testing.assert_array_almost_equal(K, expected)
+
+    def test_shear_both_axes(self):
+        """Test shear in both x and y directions."""
+        K = shear2D(0.3, 0.7)
+        expected = np.array([[1,   0.3, 0],
+                            [0.7, 1,   0],
+                            [0,   0,   1]])
+        np.testing.assert_array_almost_equal(K, expected)
+
+    def test_shear_negative(self):
+        """Test shear with negative values."""
+        K = shear2D(-0.5, -0.25)
+        expected = np.array([[1,     -0.5, 0],
+                            [-0.25, 1,    0],
+                            [0,     0,    1]])
+        np.testing.assert_array_almost_equal(K, expected)
+
+    def test_shear_point_x(self):
+        """Test that shear matrix correctly shears a point in x direction."""
+        K = shear2D(1, 0)  # Shear x by y amount
+        point = np.array([0, 2, 1])  # Point at (0, 2)
+        result = K @ point
+        expected = np.array([2, 2, 1])  # x shifted by y*kx = 2*1 = 2
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_shear_point_y(self):
+        """Test that shear matrix correctly shears a point in y direction."""
+        K = shear2D(0, 1)  # Shear y by x amount
+        point = np.array([3, 0, 1])  # Point at (3, 0)
+        result = K @ point
+        expected = np.array([3, 3, 1])  # y shifted by x*ky = 3*1 = 3
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_shear_vector(self):
+        """Test that shear matrix correctly shears a vector."""
+        K = shear2D(0.5, 0.5)
+        vector = np.array([2, 2, 0])  # Vector (w=0)
+        result = K @ vector
+        expected = np.array([3, 3, 0])  # x += y*0.5, y += x*0.5
+        np.testing.assert_array_almost_equal(result, expected)
+
+
+class TestTRKS2D:
+    """Tests for the trks2D combined transformation function."""
+
+    def test_trks_identity(self):
+        """Test TRKS with identity transformations."""
+        M = trks2D(0, 0, 0, 0, 0, 1, 1)
+        expected = np.eye(3)
+        np.testing.assert_array_almost_equal(M, expected)
+
+    def test_trks_translation_only(self):
+        """Test TRKS with only translation."""
+        M = trks2D(3, 2, 0, 0, 0, 1, 1)
+        expected = translate2D(3, 2)
+        np.testing.assert_array_almost_equal(M, expected)
+
+    def test_trks_rotation_only(self):
+        """Test TRKS with only rotation."""
+        angle = np.pi / 4
+        M = trks2D(0, 0, angle, 0, 0, 1, 1)
+        expected = rotate2D(angle)
+        np.testing.assert_array_almost_equal(M, expected)
+
+    def test_trks_shear_only(self):
+        """Test TRKS with only shear."""
+        M = trks2D(0, 0, 0, 0.5, 0.3, 1, 1)
+        expected = shear2D(0.5, 0.3)
+        np.testing.assert_array_almost_equal(M, expected)
+
+    def test_trks_scale_only(self):
+        """Test TRKS with only scaling."""
+        M = trks2D(0, 0, 0, 0, 0, 2, 3)
+        expected = scale2D(2, 3)
+        np.testing.assert_array_almost_equal(M, expected)
+
+    def test_trks_order_matters(self):
+        """Test that TRKS applies transformations in the correct order: T * R * K * S."""
+        tx, ty = 5, 3
+        angle = np.pi / 2
+        kx, ky = 0.5, 0.3
+        sx, sy = 2, 2
+        
+        M = trks2D(tx, ty, angle, kx, ky, sx, sy)
+        
+        # Manually compute T * R * K * S
+        T = translate2D(tx, ty)
+        R = rotate2D(angle)
+        K = shear2D(kx, ky)
+        S = scale2D(sx, sy)
+        expected = T @ R @ K @ S
+        
+        np.testing.assert_array_almost_equal(M, expected)
+
+    def test_trks_equals_trs_when_no_shear(self):
+        """Test that TRKS equals TRS when shear is zero."""
+        tx, ty = 10, 5
+        angle = np.pi / 6
+        sx, sy = 1.5, 2.0
+        
+        M_trks = trks2D(tx, ty, angle, 0, 0, sx, sy)
+        M_trs = trs2D(tx, ty, angle, sx, sy)
+        
+        np.testing.assert_array_almost_equal(M_trks, M_trs)
+
+    def test_trks_transform_point(self):
+        """Test TRKS transformation on a point."""
+        # Start with point (1, 0)
+        point = np.array([1, 0, 1])
+        
+        # Scale by 2, shear kx=0.5, rotate 90°, translate by (3, 2)
+        M = trks2D(3, 2, np.pi / 2, 0.5, 0, 2, 2)
+        result = M @ point
+        
+        # Manual calculation:
+        # Scale: (1, 0) -> (2, 0)
+        # Shear (kx=0.5): x += y*0.5 = 0, so (2, 0) -> (2, 0)
+        # Rotate 90°: (2, 0) -> (0, 2)
+        # Translate: (0, 2) -> (3, 4)
+        expected = np.array([3, 4, 1])
+        
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_trks_matrix_properties(self):
+        """Test that TRKS matrix has correct properties for affine transformation."""
+        M = trks2D(5, 3, np.pi / 4, 0.2, 0.1, 2, 1.5)
         
         # Bottom row should always be [0, 0, 1]
         assert M[2, 0] == 0
