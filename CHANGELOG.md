@@ -1,0 +1,11 @@
+# Changelog
+
+## [0.1.0] - 2025-12-31
+
+### Added
+- Initial release
+- 2D coordinate frame transformations
+- Hierarchical frame support
+- Point and Vector classes with proper transformation semantics
+- Visualization module (optional, requires matplotlib)
+- Comprehensive examples and documentation
