@@ -36,7 +36,7 @@ def transform_coordinate(transform: np.ndarray, coordinates: np.ndarray, coordin
         
         >>> # Multiple points (DxN array)
         >>> transform_coordinate(translate2D(5, 3), np.array([[1, 2], [3, 4]]), CoordinateType.POINT)
-        array([[6., 7.], [6., 7.]])  # Both points moved by (5, 3)
+        array([[6., 7.], [6., 7.]])  # Point (1,3) becomes (6,6) and point (2,4) becomes (7,7)
     """
     # Determine if we have single coordinate (1D or 2D with shape (2,)) or multiple coordinates (2D with shape (D, N))
     is_single = coordinates.ndim == 1
