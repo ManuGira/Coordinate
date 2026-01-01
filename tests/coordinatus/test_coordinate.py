@@ -339,6 +339,106 @@ class TestCoordinateToFrame:
         np.testing.assert_array_almost_equal(result.local_coords, expected)
 
 
+class TestDxNArraySupport:
+    """Tests for DxN array support - working with multiple points/vectors."""
+
+    def test_transform_multiple_points_translation(self):
+        """Test transforming multiple points with translation."""
+        transform = translate2D(5, 3)
+        # 2D array with 3 points: [x1, x2, x3] and [y1, y2, y3]
+        coords = np.array([[1, 2, 3], [2, 4, 6]])  # shape (2, 3)
+        result = transform_coordinate(transform, coords, CoordinateType.POINT)
+        
+        # All points should be translated
+        expected = np.array([[6, 7, 8], [5, 7, 9]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_transform_multiple_vectors_translation(self):
+        """Test that translation doesn't affect multiple vectors."""
+        transform = translate2D(5, 3)
+        coords = np.array([[1, 2, 3], [2, 4, 6]])  # shape (2, 3)
+        result = transform_coordinate(transform, coords, CoordinateType.VECTOR)
+        
+        # Vectors should be unchanged by translation
+        expected = np.array([[1, 2, 3], [2, 4, 6]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_transform_multiple_points_rotation(self):
+        """Test transforming multiple points with rotation."""
+        transform = rotate2D(np.pi / 2)  # 90 degrees
+        coords = np.array([[1, 0, 1], [0, 1, 1]])  # 3 points: (1,0), (0,1), (1,1)
+        result = transform_coordinate(transform, coords, CoordinateType.POINT)
+        
+        # After 90 degree rotation: (1,0)->(0,1), (0,1)->(-1,0), (1,1)->(-1,1)
+        expected = np.array([[0, -1, -1], [1, 0, 1]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_transform_multiple_vectors_rotation(self):
+        """Test transforming multiple vectors with rotation."""
+        transform = rotate2D(np.pi / 2)  # 90 degrees
+        coords = np.array([[1, 0], [0, 1]])  # 2 vectors: (1,0) and (0,1)
+        result = transform_coordinate(transform, coords, CoordinateType.VECTOR)
+        
+        # Vectors should also rotate
+        expected = np.array([[0, -1], [1, 0]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_transform_multiple_points_scale(self):
+        """Test transforming multiple points with scaling."""
+        transform = scale2D(2, 3)
+        coords = np.array([[1, 2], [3, 4]])  # 2 points: (1,3) and (2,4)
+        result = transform_coordinate(transform, coords, CoordinateType.POINT)
+        
+        expected = np.array([[2, 4], [9, 12]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_3d_points_translation(self):
+        """Test transforming 3D points (though transform is 2D embedded in 3D)."""
+        # For 3D we'd need a 4x4 transform, but let's test the concept
+        # This test documents current 2D-only behavior
+        transform = translate2D(5, 3)
+        coords = np.array([[1, 2], [3, 4]])  # 2 points in 2D
+        result = transform_coordinate(transform, coords, CoordinateType.POINT)
+        
+        expected = np.array([[6, 7], [6, 7]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_point_with_multiple_coordinates(self):
+        """Test Point class with multiple coordinates."""
+        frame = Frame(transform=translate2D(5, 3), parent=None)
+        # Create a point with multiple coordinates
+        coords = np.array([[1, 2, 3], [2, 4, 6]])  # 3 points
+        point = Point(local_coords=coords, frame=frame)
+        
+        result = point.to_absolute()
+        
+        # All points should be translated
+        expected = np.array([[6, 7, 8], [5, 7, 9]])
+        np.testing.assert_array_almost_equal(result.local_coords, expected)
+
+    def test_vector_with_multiple_coordinates(self):
+        """Test Vector class with multiple coordinates."""
+        frame = Frame(transform=translate2D(5, 3), parent=None)
+        # Create a vector with multiple coordinates
+        coords = np.array([[1, 2, 3], [2, 4, 6]])  # 3 vectors
+        vector = Vector(local_coords=coords, frame=frame)
+        
+        result = vector.to_absolute()
+        
+        # Vectors should be unchanged by translation
+        expected = np.array([[1, 2, 3], [2, 4, 6]])
+        np.testing.assert_array_almost_equal(result.local_coords, expected)
+
+    def test_single_point_still_works(self):
+        """Test that single point (2,) still works after DxN implementation."""
+        transform = translate2D(5, 3)
+        coords = np.array([1, 2])  # shape (2,)
+        result = transform_coordinate(transform, coords, CoordinateType.POINT)
+        
+        expected = np.array([6, 5])
+        np.testing.assert_array_almost_equal(result, expected)
+
+
 class TestPointAndVectorBehavior:
     """Tests to verify Point and Vector behave differently with transformations."""
 
