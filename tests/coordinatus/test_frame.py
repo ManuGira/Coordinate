@@ -29,6 +29,66 @@ class TestFrameInit:
         np.testing.assert_array_equal(child.parent.transform, parent_transform)
 
 
+class TestFrameEquality:
+    """Tests for Frame equality comparison."""
+
+    def test_same_reference_equal(self):
+        """Test that same frame object is equal to itself."""
+        frame = Frame(transform=translate2D(5, 3))
+        
+        assert frame == frame
+        assert not (frame != frame)
+
+    def test_different_frames_not_equal(self):
+        """Test that different frame objects are not equal by default."""
+        frame1 = Frame(transform=translate2D(5, 3))
+        frame2 = Frame(transform=translate2D(5, 3))
+        
+        # Different objects, not the same reference
+        assert frame1 is not frame2
+        assert frame1 != frame2
+
+    def test_identity_frames_equal(self):
+        """Test that two identity frames (no parent, identity transform) are equal."""
+        frame1 = Frame()  # Default is identity
+        frame2 = Frame()  # Another identity
+        
+        assert frame1 == frame2
+        assert not (frame1 != frame2)
+
+    def test_identity_frames_with_explicit_identity_equal(self):
+        """Test identity frames created explicitly."""
+        frame1 = Frame(transform=np.eye(3), parent=None)
+        frame2 = Frame(transform=np.eye(3), parent=None)
+        
+        assert frame1 == frame2
+
+    def test_identity_and_non_identity_not_equal(self):
+        """Test that identity frame is not equal to non-identity frame."""
+        identity_frame = Frame()
+        translated_frame = Frame(transform=translate2D(5, 3))
+        
+        assert identity_frame != translated_frame
+
+    def test_frames_with_parents_not_equal(self):
+        """Test that frames with parents are not equal (even if transforms are same)."""
+        parent = Frame()
+        frame1 = Frame(transform=translate2D(5, 3), parent=parent)
+        frame2 = Frame(transform=translate2D(5, 3), parent=parent)
+        
+        # Even though they have same transform and parent, they're different objects
+        assert frame1 != frame2
+
+    def test_frame_not_equal_to_non_frame(self):
+        """Test that frame is not equal to non-Frame object."""
+        frame = Frame()
+        
+        assert frame is not None
+        assert frame != 42
+        assert frame != "frame"
+        assert frame != np.eye(3)
+
+
 class TestComputeAbsoluteTransform:
     """Tests for the compute_absolute_transform method."""
 

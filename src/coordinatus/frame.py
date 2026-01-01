@@ -39,6 +39,38 @@ class Frame:
         self.transform = transform if transform is not None else np.eye(3)
         self.parent = parent
 
+    def __eq__(self, other):
+        """Check if two frames are equal.
+        
+        Two frames are considered equal if:
+        1. They are the same object (same reference), OR
+        2. Both have no parent and both have identity transforms
+        
+        This allows coordinates in identity/absolute frames to be operated on together.
+        
+        Args:
+            other: Another Frame object to compare with.
+        
+        Returns:
+            True if frames are considered equal, False otherwise.
+        """
+        if not isinstance(other, Frame):
+            return False
+        
+        # Same object reference
+        if self is other:
+            return True
+        
+        # Both are identity frames (no parent and identity transform)
+        if self.parent is None and other.parent is None:
+            return np.allclose(self.transform, np.eye(3)) and np.allclose(other.transform, np.eye(3))
+        
+        return False
+
+    def __ne__(self, other):
+        """Check if two frames are not equal."""
+        return not self.__eq__(other)
+
     def compute_absolute_transform(self) -> np.ndarray:
         """Computes the cumulative transformation matrix from this frame to absolute space.
         

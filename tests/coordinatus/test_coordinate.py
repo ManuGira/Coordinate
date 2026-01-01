@@ -471,6 +471,203 @@ class TestDxNArraySupport:
         np.testing.assert_array_almost_equal(result, expected)
 
 
+class TestCoordinateOperators:
+    """Tests for mathematical operators on Coordinate objects."""
+
+    def test_coordinate_addition(self):
+        """Test adding two coordinates."""
+        point1 = Point([1, 2])
+        point2 = Point([3, 4])
+        
+        result = point1 + point2
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [4, 6])
+        assert result.coordinate_type == CoordinateType.POINT
+        assert result.frame is point1.frame
+
+    def test_coordinate_subtraction(self):
+        """Test subtracting two coordinates."""
+        point1 = Point([5, 7])
+        point2 = Point([2, 3])
+        
+        result = point1 - point2
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [3, 4])
+        assert result.coordinate_type == CoordinateType.POINT
+
+    def test_coordinate_scalar_multiplication(self):
+        """Test multiplying coordinate by scalar."""
+        point = Point([2, 3])
+        
+        result = point * 2
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [4, 6])
+        assert result.coordinate_type == CoordinateType.POINT
+
+    def test_coordinate_scalar_multiplication_reverse(self):
+        """Test multiplying scalar by coordinate."""
+        point = Point([2, 3])
+        
+        result = 2 * point
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [4, 6])
+
+    def test_coordinate_division(self):
+        """Test dividing coordinate by scalar."""
+        point = Point([4, 6])
+        
+        result = point / 2
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [2, 3])
+
+    def test_coordinate_negation(self):
+        """Test negating a coordinate."""
+        point = Point([1, -2])
+        
+        result = -point
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [-1, 2])
+
+    def test_coordinate_indexing(self):
+        """Test indexing into a coordinate."""
+        point = Point([5, 10])
+        
+        assert point[0] == 5
+        assert point[1] == 10
+
+    def test_coordinate_item_assignment(self):
+        """Test assigning to coordinate items."""
+        point = Point([1, 2])
+        point[0] = 5
+        
+        assert point[0] == 5
+        np.testing.assert_array_equal(point.local_coords, [5, 2])
+
+    def test_coordinate_length(self):
+        """Test getting length of coordinate."""
+        point = Point([1, 2])
+        
+        assert len(point) == 2
+
+    def test_coordinate_as_numpy_array(self):
+        """Test using coordinate in numpy operations."""
+        point = Point([1, 2])
+        
+        # Should work with numpy functions via __array__
+        result = np.sin(point)
+        expected = np.sin(np.array([1, 2]))
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_coordinate_equality(self):
+        """Test coordinate equality comparison."""
+        point1 = Point([1, 2])
+        point2 = Point([1, 2])
+        point3 = Point([3, 4])
+        
+        assert point1 == point2
+        assert point1 != point3
+
+    def test_coordinate_absolute_value(self):
+        """Test absolute value of coordinate."""
+        point = Point([-3, 4])
+        
+        result = abs(point)
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [3, 4])
+
+    def test_multiple_coordinates_indexing(self):
+        """Test indexing with multiple coordinates."""
+        point = Point([[1, 2, 3], [4, 5, 6]])  # DxN array
+        
+        # Index first dimension
+        np.testing.assert_array_equal(point[0], [1, 2, 3])
+        # Index specific element
+        assert point[1, 2] == 6
+
+    def test_operations_preserve_frame(self):
+        """Test that operations preserve the coordinate frame."""
+        frame = Frame(transform=translate2D(5, 3))
+        point = Point([1, 2], frame=frame)
+        
+        result = point * 2
+        assert result.frame is frame
+
+    def test_vector_operations(self):
+        """Test operations on vectors preserve vector type."""
+        vector = Vector([1, 0])
+        
+        result = vector * 3
+        assert isinstance(result, Coordinate)
+        assert result.coordinate_type == CoordinateType.VECTOR
+        np.testing.assert_array_equal(result.local_coords, [3, 0])
+
+    def test_different_frames_addition_raises_error(self):
+        """Test that adding coordinates from different frames raises an error."""
+        frame1 = Frame(transform=translate2D(5, 0))
+        frame2 = Frame(transform=translate2D(0, 5))
+        
+        point1 = Point([1, 2], frame=frame1)
+        point2 = Point([3, 4], frame=frame2)
+        
+        with np.testing.assert_raises(ValueError) as exc_info:
+            _ = point1 + point2
+        assert "different frames" in str(exc_info.exception).lower()
+
+    def test_different_frames_subtraction_raises_error(self):
+        """Test that subtracting coordinates from different frames raises an error."""
+        frame1 = Frame(transform=translate2D(5, 0))
+        frame2 = Frame(transform=translate2D(0, 5))
+        
+        point1 = Point([1, 2], frame=frame1)
+        point2 = Point([3, 4], frame=frame2)
+        
+        with np.testing.assert_raises(ValueError) as exc_info:
+            _ = point1 - point2
+        assert "different frames" in str(exc_info.exception).lower()
+
+    def test_different_frames_multiplication_raises_error(self):
+        """Test that multiplying coordinates from different frames raises an error."""
+        frame1 = Frame(transform=translate2D(5, 0))
+        frame2 = Frame(transform=translate2D(0, 5))
+        
+        point1 = Point([1, 2], frame=frame1)
+        point2 = Point([3, 4], frame=frame2)
+        
+        with np.testing.assert_raises(ValueError) as exc_info:
+            _ = point1 * point2
+        assert "different frames" in str(exc_info.exception).lower()
+
+    def test_different_frames_division_raises_error(self):
+        """Test that dividing coordinates from different frames raises an error."""
+        frame1 = Frame(transform=translate2D(5, 0))
+        frame2 = Frame(transform=translate2D(0, 5))
+        
+        point1 = Point([4, 6], frame=frame1)
+        point2 = Point([2, 3], frame=frame2)
+        
+        with np.testing.assert_raises(ValueError) as exc_info:
+            _ = point1 / point2
+        assert "different frames" in str(exc_info.exception).lower()
+
+    def test_same_frame_operations_work(self):
+        """Test that operations between coordinates in the same frame work correctly."""
+        frame = Frame(transform=translate2D(5, 0))
+        
+        point1 = Point([1, 2], frame=frame)
+        point2 = Point([3, 4], frame=frame)
+        
+        # All these should work
+        result_add = point1 + point2
+        result_sub = point1 - point2
+        result_mul = point1 * point2
+        result_div = point2 / point1
+        
+        np.testing.assert_array_equal(result_add.local_coords, [4, 6])
+        np.testing.assert_array_equal(result_sub.local_coords, [-2, -2])
+        np.testing.assert_array_equal(result_mul.local_coords, [3, 8])
+        np.testing.assert_array_equal(result_div.local_coords, [3, 2])
+
+
 class TestPointAndVectorBehavior:
     """Tests to verify Point and Vector behave differently with transformations."""
 
