@@ -667,6 +667,104 @@ class TestCoordinateOperators:
         np.testing.assert_array_equal(result_mul.local_coords, [3, 8])
         np.testing.assert_array_equal(result_div.local_coords, [3, 2])
 
+    def test_coordinate_with_array_addition(self):
+        """Test adding a coordinate with a plain array."""
+        point = Point([1, 2])
+        array = np.array([3, 4])
+        
+        result = point + array
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [4, 6])
+
+    def test_coordinate_with_array_subtraction(self):
+        """Test subtracting a plain array from coordinate."""
+        point = Point([5, 7])
+        array = np.array([2, 3])
+        
+        result = point - array
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [3, 4])
+
+    def test_right_addition_with_array(self):
+        """Test right addition (array + coordinate)."""
+        point = Point([1, 2])
+        array = np.array([3, 4])
+        
+        result = array + point
+        # When numpy array is on the left, numpy handles it and returns array
+        assert isinstance(result, np.ndarray)
+        np.testing.assert_array_equal(result, [4, 6])
+
+    def test_right_subtraction_with_array(self):
+        """Test right subtraction (array - coordinate)."""
+        point = Point([1, 2])
+        array = np.array([5, 7])
+        
+        result = array - point
+        # When numpy array is on the left, numpy handles it and returns array
+        assert isinstance(result, np.ndarray)
+        np.testing.assert_array_equal(result, [4, 5])
+
+    def test_right_division_with_array(self):
+        """Test right division (array / coordinate)."""
+        point = Point([2, 4])
+        array = np.array([8, 12])
+        
+        result = array / point
+        # When numpy array is on the left, numpy handles it and returns array
+        assert isinstance(result, np.ndarray)
+        np.testing.assert_array_equal(result, [4, 3])
+
+    def test_array_conversion_with_dtype(self):
+        """Test __array__ method with dtype specification."""
+        point = Point([1.5, 2.7])
+        
+        # Convert to integer array
+        int_array = np.asarray(point, dtype=int)
+        np.testing.assert_array_equal(int_array, [1, 2])
+
+    def test_repr(self):
+        """Test string representation of coordinate."""
+        point = Point([1, 2])
+        repr_str = repr(point)
+        
+        assert "Point" in repr_str
+        assert "local_coords" in repr_str
+
+    def test_equality_with_array(self):
+        """Test equality comparison with plain array."""
+        point = Point([1, 2])
+        array = np.array([1, 2])
+        
+        assert point == array
+
+    def test_radd_with_scalar(self):
+        """Test right addition with scalar (scalar + coordinate)."""
+        point = Point([1, 2])
+        
+        # This should trigger __radd__
+        result = 5 + point
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [6, 7])
+
+    def test_rsub_with_scalar(self):
+        """Test right subtraction with scalar (scalar - coordinate)."""
+        point = Point([1, 2])
+        
+        # This should trigger __rsub__
+        result = 10 - point
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [9, 8])
+
+    def test_rtruediv_with_scalar(self):
+        """Test right division with scalar (scalar / coordinate)."""
+        point = Point([2, 4])
+        
+        # This should trigger __rtruediv__
+        result = 8 / point
+        assert isinstance(result, Coordinate)
+        np.testing.assert_array_equal(result.local_coords, [4, 2])
+
 
 class TestPointAndVectorBehavior:
     """Tests to verify Point and Vector behave differently with transformations."""

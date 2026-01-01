@@ -9,7 +9,7 @@ from .coordinate import Coordinate, Point, Vector, transform_coordinate
 # Visualization is optional - only available if matplotlib is installed
 try:
     from . import visualization
-except ImportError:
+except ImportError:  # pragma: no cover
     visualization = None  # type: ignore[assignment]
 
 # Define what's available when using "from coordinate import *"

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 try:
     from matplotlib.axes import Axes as _Axes
     _HAS_MATPLOTLIB = True
-except ImportError:
+except ImportError:  # pragma: no cover
     _HAS_MATPLOTLIB = False
     _Axes = None  # type: ignore
 
@@ -25,7 +25,7 @@ from .coordinate import Point, Vector
 
 def _check_matplotlib():
     """Check if matplotlib is available."""
-    if not _HAS_MATPLOTLIB:
+    if not _HAS_MATPLOTLIB:  # pragma: no cover
         raise ImportError(
             "Matplotlib is required for visualization. "
             "Install it with: pip install coordinatus[plotting]"
