@@ -13,6 +13,50 @@ Ever needed to convert coordinates between different spaces?  *Coordinatus* make
 - **Clean transformations**: Simple functions for translation, rotation, and scaling
 - **Type-safe**: Points and Vectors are distinct types with correct transformation behavior
 
+## Installation
+
+### Using pip
+
+```bash
+pip install coordinatus
+```
+
+### Using uv
+
+```bash
+uv add coordinatus
+```
+
+### Installing the Development Version
+
+To install the latest development version from the `develop` branch:
+
+**Using pip:**
+```bash
+pip install git+https://github.com/ManuGira/Coordinatus.git@develop
+```
+
+**Using uv:**
+```bash
+uv add git+https://github.com/ManuGira/Coordinatus.git@develop
+```
+
+### Optional: Visualization Support
+
+For plotting and visualization features (used in examples):
+
+**Using pip:**
+```bash
+pip install coordinatus[plotting]
+```
+
+**Using uv:**
+```bash
+uv add coordinatus[plotting]
+```
+
+This installs matplotlib for the `coordinatus.visualization` module.
+
 ## Quick Start
 
 ```python
@@ -99,21 +143,6 @@ From Frame 2's perspective, Frame 2 is now at the origin with standard axes. The
 
 **Key insight:** Coordinates are not absolute—they depend on the observer. The F shape's numerical coordinates change in each view, but the shape's position in physical space remains constant. This is the essence of relative coordinate systems.
 
-## Installation
-
-```bash
-pip install coordinatus
-```
-
-### Optional: Visualization Support
-
-For plotting and visualization features (used in examples):
-
-```bash
-pip install coordinatus[plotting]
-```
-
-This installs matplotlib for the `coordinatus.visualization` module.
 
 ## API Overview
 
