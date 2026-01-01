@@ -2,6 +2,7 @@
 
 from typing import Optional
 import numpy as np
+from numpy.typing import ArrayLike
 
 from .frame import Frame
 from .types import CoordinateType
@@ -89,20 +90,24 @@ class Coordinate:
     Examples:
         >>> frame = Frame(transform=translate2D(5, 3))
         >>> coord = Coordinate(CoordinateType.POINT, np.array([1, 2]), frame)
+        >>> coord = Coordinate(CoordinateType.POINT, [1, 2], frame)  # list also works
+        >>> coord = Coordinate(CoordinateType.POINT, (1, 2), frame)  # tuple also works
         >>> absolute_coord = coord.to_absolute()
     """
 
-    def __init__(self, coordinate_type: CoordinateType, local_coords: np.ndarray, frame: Optional[Frame] = None):
+    def __init__(self, coordinate_type: CoordinateType, local_coords: ArrayLike, frame: Optional[Frame] = None):
         """Initialize a coordinate.
         
         Args:
             coordinate_type: CoordinateType.POINT or CoordinateType.VECTOR
-            local_coords: 2D numpy array [x, y] in the local coordinate frame
+            local_coords: Array-like (numpy array, list, tuple, etc.) representing coordinates.
+                         Can be [x, y] for a single point/vector or [[x1, x2, ...], [y1, y2, ...]]
+                         for multiple points/vectors.
             frame: Coordinate frame this coordinate is defined in.
                    If None, uses absolute/identity frame.
         """
         self.coordinate_type = coordinate_type
-        self.local_coords = local_coords
+        self.local_coords = np.asarray(local_coords)
         self.frame = frame if frame is not None else Frame()
 
     def to_absolute(self) -> 'Coordinate':
@@ -157,18 +162,21 @@ class Point(Coordinate):
     Use this class to represent positions in space.
     
     Args:
-        local_coords: 2D numpy array [x, y] representing the point position
+        local_coords: Array-like (numpy array, list, tuple) [x, y] representing the point position,
+                     or [[x1, x2, ...], [y1, y2, ...]] for multiple points.
         frame: Coordinate frame this point is defined in. If None, uses absolute frame.
     
     Examples:
         >>> # Point at origin in a translated frame
         >>> frame = Frame(transform=translate2D(10, 5))
-        >>> point = Point(np.array([0, 0]), frame=frame)
+        >>> point = Point([0, 0], frame=frame)  # list works
+        >>> point = Point((0, 0), frame=frame)  # tuple works
+        >>> point = Point(np.array([0, 0]), frame=frame)  # numpy array works
         >>> absolute_point = point.to_absolute()
         >>> absolute_point.local_coords  # [10, 5] - affected by translation
     """
     
-    def __init__(self, local_coords: np.ndarray, frame: Optional[Frame] = None):
+    def __init__(self, local_coords: ArrayLike, frame: Optional[Frame] = None):
         super().__init__(
             coordinate_type=CoordinateType.POINT,
             local_coords=local_coords, 
@@ -182,18 +190,21 @@ class Vector(Coordinate):
     Use this class to represent directions, velocities, or relative displacements.
     
     Args:
-        local_coords: 2D numpy array [x, y] representing the vector components
+        local_coords: Array-like (numpy array, list, tuple) [x, y] representing the vector components,
+                     or [[x1, x2, ...], [y1, y2, ...]] for multiple vectors.
         frame: Coordinate frame this vector is defined in. If None, uses absolute frame.
     
     Examples:
         >>> # Vector in a translated frame
         >>> frame = Frame(transform=translate2D(10, 5))
-        >>> vector = Vector(np.array([1, 0]), frame=frame)
+        >>> vector = Vector([1, 0], frame=frame)  # list works
+        >>> vector = Vector((1, 0), frame=frame)  # tuple works
+        >>> vector = Vector(np.array([1, 0]), frame=frame)  # numpy array works
         >>> absolute_vector = vector.to_absolute()
         >>> absolute_vector.local_coords  # Still [1, 0] - unaffected by translation
     """
     
-    def __init__(self, local_coords: np.ndarray, frame: Optional[Frame] = None):
+    def __init__(self, local_coords: ArrayLike, frame: Optional[Frame] = None):
         super().__init__(
             coordinate_type=CoordinateType.VECTOR,
             local_coords=local_coords, 

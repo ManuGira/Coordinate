@@ -119,6 +119,22 @@ class TestPointInit:
         assert point.coordinate_type == CoordinateType.POINT
         assert point.frame is frame
 
+    def test_point_init_with_list(self):
+        """Test creating a point with a list."""
+        point = Point(local_coords=[3, 4])
+        
+        assert point.coordinate_type == CoordinateType.POINT
+        np.testing.assert_array_equal(point.local_coords, [3, 4])
+        assert isinstance(point.local_coords, np.ndarray)
+
+    def test_point_init_with_tuple(self):
+        """Test creating a point with a tuple."""
+        point = Point(local_coords=(3, 4))
+        
+        assert point.coordinate_type == CoordinateType.POINT
+        np.testing.assert_array_equal(point.local_coords, [3, 4])
+        assert isinstance(point.local_coords, np.ndarray)
+
 
 class TestVectorInit:
     """Tests for Vector initialization."""
@@ -138,6 +154,22 @@ class TestVectorInit:
         
         assert vector.coordinate_type == CoordinateType.VECTOR
         assert vector.frame is frame
+
+    def test_vector_init_with_list(self):
+        """Test creating a vector with a list."""
+        vector = Vector(local_coords=[1, 0])
+        
+        assert vector.coordinate_type == CoordinateType.VECTOR
+        np.testing.assert_array_equal(vector.local_coords, [1, 0])
+        assert isinstance(vector.local_coords, np.ndarray)
+
+    def test_vector_init_with_tuple(self):
+        """Test creating a vector with a tuple."""
+        vector = Vector(local_coords=(1, 0))
+        
+        assert vector.coordinate_type == CoordinateType.VECTOR
+        np.testing.assert_array_equal(vector.local_coords, [1, 0])
+        assert isinstance(vector.local_coords, np.ndarray)
 
 
 class TestCoordinateToAbsolute:
