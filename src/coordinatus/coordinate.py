@@ -84,7 +84,7 @@ class Coordinate:
     
     Attributes:
         coordinate_type: CoordinateType.POINT or CoordinateType.VECTOR
-        local_coords: 2D numpy array [x, y] in the local coordinate frame
+        coords: 2D numpy array [x, y] in the local coordinate frame
         frame: The coordinate frame this coordinate is defined in
     
     Examples:
@@ -95,42 +95,42 @@ class Coordinate:
         >>> absolute_coord = coord.to_absolute()
     """
 
-    def __init__(self, coordinate_type: CoordinateType, local_coords: ArrayLike, frame: Optional[Frame] = None):
+    def __init__(self, coordinate_type: CoordinateType, coords: ArrayLike, frame: Optional[Frame] = None):
         """Initialize a coordinate.
         
         Args:
             coordinate_type: CoordinateType.POINT or CoordinateType.VECTOR
-            local_coords: Array-like (numpy array, list, tuple, etc.) representing coordinates.
+            coords: Array-like (numpy array, list, tuple, etc.) representing coordinates.
                          Can be [x, y] for a single point/vector or [[x1, x2, ...], [y1, y2, ...]]
                          for multiple points/vectors.
             frame: Coordinate frame this coordinate is defined in.
                    If None, uses absolute/identity frame.
         """
         self.coordinate_type = coordinate_type
-        self.local_coords = np.asarray(local_coords)
+        self.coords = np.asarray(coords)
         self.frame = frame if frame is not None else Frame()
 
     def __array__(self, dtype=None):
         """Return the underlying numpy array for numpy operations."""
         if dtype is None:
-            return self.local_coords
-        return self.local_coords.astype(dtype)
+            return self.coords
+        return self.coords.astype(dtype)
 
     def __getitem__(self, key):
         """Support indexing operations like coord[0] or coord[0, 1]."""
-        return self.local_coords[key]
+        return self.coords[key]
 
     def __setitem__(self, key, value):
         """Support item assignment like coord[0] = 5."""
-        self.local_coords[key] = value
+        self.coords[key] = value
 
     def __len__(self):
         """Return length of the coordinate array."""
-        return len(self.local_coords)
+        return len(self.coords)
 
     def __repr__(self):
         """String representation of the coordinate."""
-        return f"{self.__class__.__name__}(local_coords={self.local_coords!r}, frame={self.frame!r})"
+        return f"{self.__class__.__name__}(coords={self.coords!r}, frame={self.frame!r})"
 
     # Arithmetic operators
     def __add__(self, other):
@@ -138,77 +138,77 @@ class Coordinate:
         if isinstance(other, Coordinate):
             if self.frame != other.frame:
                 raise ValueError("Cannot add coordinates from different frames. Convert to same frame first.")
-            new_coords = self.local_coords + other.local_coords
+            new_coords = self.coords + other.coords
         else:
-            new_coords = self.local_coords + other
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+            new_coords = self.coords + other
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __radd__(self, other):
         """Right addition."""
-        new_coords = self.local_coords + other
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+        new_coords = self.coords + other
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __sub__(self, other):
         """Subtract coordinates or arrays."""
         if isinstance(other, Coordinate):
             if self.frame != other.frame:
                 raise ValueError("Cannot subtract coordinates from different frames. Convert to same frame first.")
-            new_coords = self.local_coords - other.local_coords
+            new_coords = self.coords - other.coords
         else:
-            new_coords = self.local_coords - other
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+            new_coords = self.coords - other
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __rsub__(self, other):
         """Right subtraction."""
-        new_coords = other - self.local_coords
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+        new_coords = other - self.coords
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __mul__(self, other):
         """Multiply coordinates or arrays."""
         if isinstance(other, Coordinate):
             if self.frame != other.frame:
                 raise ValueError("Cannot multiply coordinates from different frames. Convert to same frame first.")
-            new_coords = self.local_coords * other.local_coords
+            new_coords = self.coords * other.coords
         else:
-            new_coords = self.local_coords * other
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+            new_coords = self.coords * other
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __rmul__(self, other):
         """Right multiplication."""
-        new_coords = self.local_coords * other
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+        new_coords = self.coords * other
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __truediv__(self, other):
         """Divide coordinates or arrays."""
         if isinstance(other, Coordinate):
             if self.frame != other.frame:
                 raise ValueError("Cannot divide coordinates from different frames. Convert to same frame first.")
-            new_coords = self.local_coords / other.local_coords
+            new_coords = self.coords / other.coords
         else:
-            new_coords = self.local_coords / other
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+            new_coords = self.coords / other
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __rtruediv__(self, other):
         """Right division."""
-        new_coords = other / self.local_coords
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+        new_coords = other / self.coords
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __neg__(self):
         """Negate coordinates."""
-        new_coords = -self.local_coords
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+        new_coords = -self.coords
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     def __abs__(self):
         """Absolute value of coordinates."""
-        new_coords = np.abs(self.local_coords)
-        return Coordinate(coordinate_type=self.coordinate_type, local_coords=new_coords, frame=self.frame)
+        new_coords = np.abs(self.coords)
+        return Coordinate(coordinate_type=self.coordinate_type, coords=new_coords, frame=self.frame)
 
     # Comparison operators
     def __eq__(self, other):
         """Check equality."""
         if isinstance(other, Coordinate):
-            return np.array_equal(self.local_coords, other.local_coords)
-        return np.array_equal(self.local_coords, other)
+            return np.array_equal(self.coords, other.coords)
+        return np.array_equal(self.coords, other)
 
     def __ne__(self, other):
         """Check inequality."""
@@ -228,11 +228,11 @@ class Coordinate:
             >>> child = Frame(transform=translate2D(3, 2), parent=root)
             >>> point = Point(np.array([1, 1]), frame=child)
             >>> absolute_point = point.to_absolute()
-            >>> absolute_point.local_coords  # Should be [14, 8]
+            >>> absolute_point.coords  # Should be [14, 8]
         """
         absolute_transform = self.frame.compute_absolute_transform()
-        absolute_coords = transform_coordinate(absolute_transform, self.local_coords, self.coordinate_type)
-        return Coordinate(local_coords=absolute_coords, coordinate_type=self.coordinate_type, frame=None)
+        absolute_coords = transform_coordinate(absolute_transform, self.coords, self.coordinate_type)
+        return Coordinate(coords=absolute_coords, coordinate_type=self.coordinate_type, frame=None)
         
     def relative_to(self, target_frame: Frame) -> 'Coordinate':
         """Converts this coordinate to a different coordinate frame.
@@ -251,12 +251,12 @@ class Coordinate:
             >>> frame_b = Frame(transform=translate2D(0, 3))
             >>> point_in_a = Point(np.array([0, 0]), frame=frame_a)
             >>> point_in_b = point_in_a.relative_to(frame_b)
-            >>> point_in_b.local_coords  # Should be [5, -3]
+            >>> point_in_b.coords  # Should be [5, -3]
         """
         # Inverse transform from absolute to target frame
         relative_transform = self.frame.compute_relative_transform_to(target_frame)
-        relative_coords = transform_coordinate(relative_transform, self.local_coords, self.coordinate_type)
-        return Coordinate(local_coords=relative_coords, coordinate_type=self.coordinate_type, frame=target_frame)
+        relative_coords = transform_coordinate(relative_transform, self.coords, self.coordinate_type)
+        return Coordinate(coords=relative_coords, coordinate_type=self.coordinate_type, frame=target_frame)
 
 
 class Point(Coordinate):
@@ -266,7 +266,7 @@ class Point(Coordinate):
     Use this class to represent positions in space.
     
     Args:
-        local_coords: Array-like (numpy array, list, tuple) [x, y] representing the point position,
+        coords: Array-like (numpy array, list, tuple) [x, y] representing the point position,
                      or [[x1, x2, ...], [y1, y2, ...]] for multiple points.
         frame: Coordinate frame this point is defined in. If None, uses absolute frame.
     
@@ -277,13 +277,13 @@ class Point(Coordinate):
         >>> point = Point((0, 0), frame=frame)  # tuple works
         >>> point = Point(np.array([0, 0]), frame=frame)  # numpy array works
         >>> absolute_point = point.to_absolute()
-        >>> absolute_point.local_coords  # [10, 5] - affected by translation
+        >>> absolute_point.coords  # [10, 5] - affected by translation
     """
     
-    def __init__(self, local_coords: ArrayLike, frame: Optional[Frame] = None):
+    def __init__(self, coords: ArrayLike, frame: Optional[Frame] = None):
         super().__init__(
             coordinate_type=CoordinateType.POINT,
-            local_coords=local_coords, 
+            coords=coords, 
             frame=frame)
         
 
@@ -294,7 +294,7 @@ class Vector(Coordinate):
     Use this class to represent directions, velocities, or relative displacements.
     
     Args:
-        local_coords: Array-like (numpy array, list, tuple) [x, y] representing the vector components,
+        coords: Array-like (numpy array, list, tuple) [x, y] representing the vector components,
                      or [[x1, x2, ...], [y1, y2, ...]] for multiple vectors.
         frame: Coordinate frame this vector is defined in. If None, uses absolute frame.
     
@@ -305,11 +305,11 @@ class Vector(Coordinate):
         >>> vector = Vector((1, 0), frame=frame)  # tuple works
         >>> vector = Vector(np.array([1, 0]), frame=frame)  # numpy array works
         >>> absolute_vector = vector.to_absolute()
-        >>> absolute_vector.local_coords  # Still [1, 0] - unaffected by translation
+        >>> absolute_vector.coords  # Still [1, 0] - unaffected by translation
     """
     
-    def __init__(self, local_coords: ArrayLike, frame: Optional[Frame] = None):
+    def __init__(self, coords: ArrayLike, frame: Optional[Frame] = None):
         super().__init__(
             coordinate_type=CoordinateType.VECTOR,
-            local_coords=local_coords, 
+            coords=coords, 
             frame=frame)

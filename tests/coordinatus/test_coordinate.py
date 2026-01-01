@@ -76,12 +76,12 @@ class TestCoordinateInit:
         """Test creating a coordinate without a frame creates identity frame."""
         coord = Coordinate(
             coordinate_type=CoordinateType.POINT,
-            local_coords=np.array([1, 2]),
+            coords=np.array([1, 2]),
             frame=None
         )
         
         assert coord.coordinate_type == CoordinateType.POINT
-        np.testing.assert_array_equal(coord.local_coords, [1, 2])
+        np.testing.assert_array_equal(coord.coords, [1, 2])
         assert coord.frame is not None
         assert coord.frame.parent is None
         np.testing.assert_array_equal(coord.frame.transform, np.eye(3))
@@ -91,12 +91,12 @@ class TestCoordinateInit:
         frame = Frame(transform=translate2D(5, 3), parent=None)
         coord = Coordinate(
             coordinate_type=CoordinateType.VECTOR,
-            local_coords=np.array([2, 3]),
+            coords=np.array([2, 3]),
             frame=frame
         )
         
         assert coord.coordinate_type == CoordinateType.VECTOR
-        np.testing.assert_array_equal(coord.local_coords, [2, 3])
+        np.testing.assert_array_equal(coord.coords, [2, 3])
         assert coord.frame is frame
 
 
@@ -105,35 +105,35 @@ class TestPointInit:
 
     def test_point_init_basic(self):
         """Test creating a basic point."""
-        point = Point(local_coords=np.array([3, 4]))
+        point = Point(coords=np.array([3, 4]))
         
         assert point.coordinate_type == CoordinateType.POINT
-        np.testing.assert_array_equal(point.local_coords, [3, 4])
+        np.testing.assert_array_equal(point.coords, [3, 4])
         assert point.frame is not None
 
     def test_point_init_with_system(self):
         """Test creating a point with a custom frame."""
         frame = Frame(transform=translate2D(10, 20), parent=None)
-        point = Point(local_coords=np.array([1, 1]), frame=frame)
+        point = Point(coords=np.array([1, 1]), frame=frame)
         
         assert point.coordinate_type == CoordinateType.POINT
         assert point.frame is frame
 
     def test_point_init_with_list(self):
         """Test creating a point with a list."""
-        point = Point(local_coords=[3, 4])
+        point = Point(coords=[3, 4])
         
         assert point.coordinate_type == CoordinateType.POINT
-        np.testing.assert_array_equal(point.local_coords, [3, 4])
-        assert isinstance(point.local_coords, np.ndarray)
+        np.testing.assert_array_equal(point.coords, [3, 4])
+        assert isinstance(point.coords, np.ndarray)
 
     def test_point_init_with_tuple(self):
         """Test creating a point with a tuple."""
-        point = Point(local_coords=(3, 4))
+        point = Point(coords=(3, 4))
         
         assert point.coordinate_type == CoordinateType.POINT
-        np.testing.assert_array_equal(point.local_coords, [3, 4])
-        assert isinstance(point.local_coords, np.ndarray)
+        np.testing.assert_array_equal(point.coords, [3, 4])
+        assert isinstance(point.coords, np.ndarray)
 
 
 class TestVectorInit:
@@ -141,35 +141,35 @@ class TestVectorInit:
 
     def test_vector_init_basic(self):
         """Test creating a basic vector."""
-        vector = Vector(local_coords=np.array([1, 0]))
+        vector = Vector(coords=np.array([1, 0]))
         
         assert vector.coordinate_type == CoordinateType.VECTOR
-        np.testing.assert_array_equal(vector.local_coords, [1, 0])
+        np.testing.assert_array_equal(vector.coords, [1, 0])
         assert vector.frame is not None
 
     def test_vector_init_with_system(self):
         """Test creating a vector with a custom frame."""
         frame = Frame(transform=rotate2D(np.pi / 4), parent=None)
-        vector = Vector(local_coords=np.array([1, 1]), frame=frame)
+        vector = Vector(coords=np.array([1, 1]), frame=frame)
         
         assert vector.coordinate_type == CoordinateType.VECTOR
         assert vector.frame is frame
 
     def test_vector_init_with_list(self):
         """Test creating a vector with a list."""
-        vector = Vector(local_coords=[1, 0])
+        vector = Vector(coords=[1, 0])
         
         assert vector.coordinate_type == CoordinateType.VECTOR
-        np.testing.assert_array_equal(vector.local_coords, [1, 0])
-        assert isinstance(vector.local_coords, np.ndarray)
+        np.testing.assert_array_equal(vector.coords, [1, 0])
+        assert isinstance(vector.coords, np.ndarray)
 
     def test_vector_init_with_tuple(self):
         """Test creating a vector with a tuple."""
-        vector = Vector(local_coords=(1, 0))
+        vector = Vector(coords=(1, 0))
         
         assert vector.coordinate_type == CoordinateType.VECTOR
-        np.testing.assert_array_equal(vector.local_coords, [1, 0])
-        assert isinstance(vector.local_coords, np.ndarray)
+        np.testing.assert_array_equal(vector.coords, [1, 0])
+        assert isinstance(vector.coords, np.ndarray)
 
 
 class TestCoordinateToAbsolute:
@@ -178,13 +178,13 @@ class TestCoordinateToAbsolute:
     def test_to_global_no_parent(self):
         """Test to_absolute when frame has no parent (root frame)."""
         frame = Frame(transform=translate2D(5, 3), parent=None)
-        point = Point(local_coords=np.array([1, 2]), frame=frame)
+        point = Point(coords=np.array([1, 2]), frame=frame)
         
         result = point.to_absolute()
         
         # Point at (1, 2) in frame with translation (5, 3)
         # Absolute coordinates should be (6, 5)
-        np.testing.assert_array_almost_equal(result.local_coords, [6, 5])
+        np.testing.assert_array_almost_equal(result.coords, [6, 5])
         # Result should be in identity/absolute frame
         assert result.frame.parent is None
         np.testing.assert_array_almost_equal(result.frame.transform, np.eye(3))
@@ -193,7 +193,7 @@ class TestCoordinateToAbsolute:
         """Test to_absolute with one parent level."""
         parent = Frame(transform=translate2D(10, 5), parent=None)
         child_frame = Frame(transform=translate2D(3, 2), parent=parent)
-        point = Point(local_coords=np.array([1, 1]), frame=child_frame)
+        point = Point(coords=np.array([1, 1]), frame=child_frame)
         
         result = point.to_absolute()
         
@@ -202,7 +202,7 @@ class TestCoordinateToAbsolute:
         # So point is at (4,3) in parent
         # Parent is at (10,5) in absolute
         # So point is at (14,8) in absolute
-        np.testing.assert_array_almost_equal(result.local_coords, [14, 8])
+        np.testing.assert_array_almost_equal(result.coords, [14, 8])
         # Result should be in absolute/identity frame
         assert result.frame.parent is None
         np.testing.assert_array_almost_equal(result.frame.transform, np.eye(3))
@@ -213,13 +213,13 @@ class TestCoordinateToAbsolute:
         middle = Frame(transform=translate2D(10, 10), parent=root)
         leaf = Frame(transform=translate2D(1, 1), parent=middle)
         
-        point = Point(local_coords=np.array([0, 0]), frame=leaf)
+        point = Point(coords=np.array([0, 0]), frame=leaf)
         result = point.to_absolute()
         
         # Point at origin in leaf frame
         # Leaf is at (1, 1) in middle, middle is at (10, 10) in root, root is at (100, 100) in absolute
         # So point is at (111, 111) in absolute coordinates
-        np.testing.assert_array_almost_equal(result.local_coords, [111, 111])
+        np.testing.assert_array_almost_equal(result.coords, [111, 111])
         # Result should be in absolute/identity frame
         assert result.frame.parent is None
         np.testing.assert_array_almost_equal(result.frame.transform, np.eye(3))
@@ -231,11 +231,11 @@ class TestCoordinateToAbsolute:
         child = Frame(transform=rotate2D(np.pi / 2), parent=parent)
         
         # Point at (1, 0) in child frame
-        point = Point(local_coords=np.array([1, 0]), frame=child)
+        point = Point(coords=np.array([1, 0]), frame=child)
         result = point.to_absolute()
         
         # After 90 degree rotation, (1, 0) becomes (0, 1) in absolute
-        np.testing.assert_array_almost_equal(result.local_coords, [0, 1])
+        np.testing.assert_array_almost_equal(result.coords, [0, 1])
         # Result should be in absolute/identity frame
         assert result.frame.parent is None
         np.testing.assert_array_almost_equal(result.frame.transform, np.eye(3))
@@ -245,12 +245,12 @@ class TestCoordinateToAbsolute:
         parent = Frame(transform=translate2D(10, 20), parent=None)
         child = Frame(transform=translate2D(5, 5), parent=parent)
         
-        vector = Vector(local_coords=np.array([1, 0]), frame=child)
+        vector = Vector(coords=np.array([1, 0]), frame=child)
         result = vector.to_absolute()
         
         # Vector should maintain direction, translation ignored (weight=0)
         # Vector (1, 0) should remain (1, 0) in absolute since translations don't affect vectors
-        np.testing.assert_array_almost_equal(result.local_coords, [1, 0])
+        np.testing.assert_array_almost_equal(result.coords, [1, 0])
         # Result should be in absolute/identity frame
         assert result.frame.parent is None
         np.testing.assert_array_almost_equal(result.frame.transform, np.eye(3))
@@ -262,12 +262,12 @@ class TestCoordinateToFrame:
     def test_to_system_same_system(self):
         """Test converting to the same frame."""
         frame = Frame(transform=translate2D(5, 3), parent=None)
-        point = Point(local_coords=np.array([1, 2]), frame=frame)
+        point = Point(coords=np.array([1, 2]), frame=frame)
         
         result = point.relative_to(frame)
         
         # Should have same coordinates in same frame
-        np.testing.assert_array_almost_equal(result.local_coords, [1, 2])
+        np.testing.assert_array_almost_equal(result.coords, [1, 2])
         assert result.frame is frame
 
     def test_to_system_siblings(self):
@@ -277,14 +277,14 @@ class TestCoordinateToFrame:
         frame_b = Frame(transform=translate2D(0, 3), parent=parent)
         
         # Point at (0, 0) in frame A
-        point = Point(local_coords=np.array([0, 0]), frame=frame_a)
+        point = Point(coords=np.array([0, 0]), frame=frame_a)
         
         # Convert to frame B
         result = point.relative_to(frame_b)
         
         # Point is at (5, 0) globally
         # In frame B coords (which is at (0, 3)), that's (5, -3)
-        np.testing.assert_array_almost_equal(result.local_coords, [5, -3])
+        np.testing.assert_array_almost_equal(result.coords, [5, -3])
         assert result.frame is frame_b
 
     def test_to_system_parent_to_child(self):
@@ -292,13 +292,13 @@ class TestCoordinateToFrame:
         parent = Frame(transform=translate2D(10, 5), parent=None)
         child = Frame(transform=translate2D(3, 2), parent=parent)
         
-        point = Point(local_coords=np.array([0, 0]), frame=parent)
+        point = Point(coords=np.array([0, 0]), frame=parent)
         result = point.relative_to(child)
         
         # Point at parent origin is at (10, 5) globally
         # Child origin is at (13, 7) globally
         # So parent origin in child coords is (-3, -2)
-        np.testing.assert_array_almost_equal(result.local_coords, [-3, -2])
+        np.testing.assert_array_almost_equal(result.coords, [-3, -2])
         assert result.frame is child
 
     def test_to_system_child_to_parent(self):
@@ -306,11 +306,11 @@ class TestCoordinateToFrame:
         parent = Frame(transform=translate2D(10, 5), parent=None)
         child = Frame(transform=translate2D(3, 2), parent=parent)
         
-        point = Point(local_coords=np.array([0, 0]), frame=child)
+        point = Point(coords=np.array([0, 0]), frame=child)
         result = point.relative_to(parent)
         
         # Point at child origin (13, 7 globally) is at (3, 2) in parent
-        np.testing.assert_array_almost_equal(result.local_coords, [3, 2])
+        np.testing.assert_array_almost_equal(result.coords, [3, 2])
         assert result.frame is parent
 
     def test_to_system_with_rotation(self):
@@ -319,24 +319,24 @@ class TestCoordinateToFrame:
         frame_b = Frame(transform=rotate2D(np.pi / 2), parent=None)
         
         # Point at (1, 0) in frame A
-        point = Point(local_coords=np.array([1, 0]), frame=frame_a)
+        point = Point(coords=np.array([1, 0]), frame=frame_a)
         
         # Convert to frame B (rotated 90 degrees)
         result = point.relative_to(frame_b)
         
         # (1, 0) in A becomes (0, -1) in B (inverse rotation)
-        np.testing.assert_array_almost_equal(result.local_coords, [0, -1])
+        np.testing.assert_array_almost_equal(result.coords, [0, -1])
 
     def test_to_system_vector_translation(self):
         """Test that vector conversion ignores translation."""
         frame_a = Frame(transform=translate2D(10, 5), parent=None)
         frame_b = Frame(transform=translate2D(20, 15), parent=None)
         
-        vector = Vector(local_coords=np.array([1, 0]), frame=frame_a)
+        vector = Vector(coords=np.array([1, 0]), frame=frame_a)
         result = vector.relative_to(frame_b)
         
         # Vector direction should be same regardless of translation
-        np.testing.assert_array_almost_equal(result.local_coords, [1, 0])
+        np.testing.assert_array_almost_equal(result.coords, [1, 0])
         assert result.frame is frame_b
 
     def test_to_system_vector_rotation(self):
@@ -344,11 +344,11 @@ class TestCoordinateToFrame:
         frame_a = Frame(transform=np.eye(3), parent=None)
         frame_b = Frame(transform=rotate2D(np.pi / 2), parent=None)
         
-        vector = Vector(local_coords=np.array([1, 0]), frame=frame_a)
+        vector = Vector(coords=np.array([1, 0]), frame=frame_a)
         result = vector.relative_to(frame_b)
         
         # Vector should rotate
-        np.testing.assert_array_almost_equal(result.local_coords, [0, -1])
+        np.testing.assert_array_almost_equal(result.coords, [0, -1])
 
     def test_to_system_complex_hierarchy(self):
         """Test conversion in complex hierarchy."""
@@ -358,7 +358,7 @@ class TestCoordinateToFrame:
         
         branch_b = Frame(transform=translate2D(0, 10), parent=root)
         
-        point = Point(local_coords=np.array([1, 0]), frame=leaf_a)
+        point = Point(coords=np.array([1, 0]), frame=leaf_a)
         result = point.relative_to(branch_b)
         
         # Point goes through: leaf_a -> branch_a -> root -> branch_b
@@ -368,7 +368,7 @@ class TestCoordinateToFrame:
         # In branch_b (0, 10): (10 + √2/2, √2/2 - 10)
         sqrt2_over_2 = np.sqrt(2) / 2
         expected = np.array([10 + sqrt2_over_2, sqrt2_over_2 - 10])
-        np.testing.assert_array_almost_equal(result.local_coords, expected)
+        np.testing.assert_array_almost_equal(result.coords, expected)
 
 
 class TestDxNArraySupport:
@@ -440,26 +440,26 @@ class TestDxNArraySupport:
         frame = Frame(transform=translate2D(5, 3), parent=None)
         # Create a point with multiple coordinates
         coords = np.array([[1, 2, 3], [2, 4, 6]])  # 3 points
-        point = Point(local_coords=coords, frame=frame)
+        point = Point(coords=coords, frame=frame)
         
         result = point.to_absolute()
         
         # All points should be translated
         expected = np.array([[6, 7, 8], [5, 7, 9]])
-        np.testing.assert_array_almost_equal(result.local_coords, expected)
+        np.testing.assert_array_almost_equal(result.coords, expected)
 
     def test_vector_with_multiple_coordinates(self):
         """Test Vector class with multiple coordinates."""
         frame = Frame(transform=translate2D(5, 3), parent=None)
         # Create a vector with multiple coordinates
         coords = np.array([[1, 2, 3], [2, 4, 6]])  # 3 vectors
-        vector = Vector(local_coords=coords, frame=frame)
+        vector = Vector(coords=coords, frame=frame)
         
         result = vector.to_absolute()
         
         # Vectors should be unchanged by translation
         expected = np.array([[1, 2, 3], [2, 4, 6]])
-        np.testing.assert_array_almost_equal(result.local_coords, expected)
+        np.testing.assert_array_almost_equal(result.coords, expected)
 
     def test_single_point_still_works(self):
         """Test that single point (2,) still works after DxN implementation."""
@@ -481,7 +481,7 @@ class TestCoordinateOperators:
         
         result = point1 + point2
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [4, 6])
+        np.testing.assert_array_equal(result.coords, [4, 6])
         assert result.coordinate_type == CoordinateType.POINT
         assert result.frame is point1.frame
 
@@ -492,7 +492,7 @@ class TestCoordinateOperators:
         
         result = point1 - point2
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [3, 4])
+        np.testing.assert_array_equal(result.coords, [3, 4])
         assert result.coordinate_type == CoordinateType.POINT
 
     def test_coordinate_scalar_multiplication(self):
@@ -501,7 +501,7 @@ class TestCoordinateOperators:
         
         result = point * 2
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [4, 6])
+        np.testing.assert_array_equal(result.coords, [4, 6])
         assert result.coordinate_type == CoordinateType.POINT
 
     def test_coordinate_scalar_multiplication_reverse(self):
@@ -510,7 +510,7 @@ class TestCoordinateOperators:
         
         result = 2 * point
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [4, 6])
+        np.testing.assert_array_equal(result.coords, [4, 6])
 
     def test_coordinate_division(self):
         """Test dividing coordinate by scalar."""
@@ -518,7 +518,7 @@ class TestCoordinateOperators:
         
         result = point / 2
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [2, 3])
+        np.testing.assert_array_equal(result.coords, [2, 3])
 
     def test_coordinate_negation(self):
         """Test negating a coordinate."""
@@ -526,7 +526,7 @@ class TestCoordinateOperators:
         
         result = -point
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [-1, 2])
+        np.testing.assert_array_equal(result.coords, [-1, 2])
 
     def test_coordinate_indexing(self):
         """Test indexing into a coordinate."""
@@ -541,7 +541,7 @@ class TestCoordinateOperators:
         point[0] = 5
         
         assert point[0] == 5
-        np.testing.assert_array_equal(point.local_coords, [5, 2])
+        np.testing.assert_array_equal(point.coords, [5, 2])
 
     def test_coordinate_length(self):
         """Test getting length of coordinate."""
@@ -573,7 +573,7 @@ class TestCoordinateOperators:
         
         result = abs(point)
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [3, 4])
+        np.testing.assert_array_equal(result.coords, [3, 4])
 
     def test_multiple_coordinates_indexing(self):
         """Test indexing with multiple coordinates."""
@@ -599,7 +599,7 @@ class TestCoordinateOperators:
         result = vector * 3
         assert isinstance(result, Coordinate)
         assert result.coordinate_type == CoordinateType.VECTOR
-        np.testing.assert_array_equal(result.local_coords, [3, 0])
+        np.testing.assert_array_equal(result.coords, [3, 0])
 
     def test_different_frames_addition_raises_error(self):
         """Test that adding coordinates from different frames raises an error."""
@@ -662,10 +662,10 @@ class TestCoordinateOperators:
         result_mul = point1 * point2
         result_div = point2 / point1
         
-        np.testing.assert_array_equal(result_add.local_coords, [4, 6])
-        np.testing.assert_array_equal(result_sub.local_coords, [-2, -2])
-        np.testing.assert_array_equal(result_mul.local_coords, [3, 8])
-        np.testing.assert_array_equal(result_div.local_coords, [3, 2])
+        np.testing.assert_array_equal(result_add.coords, [4, 6])
+        np.testing.assert_array_equal(result_sub.coords, [-2, -2])
+        np.testing.assert_array_equal(result_mul.coords, [3, 8])
+        np.testing.assert_array_equal(result_div.coords, [3, 2])
 
     def test_coordinate_with_array_addition(self):
         """Test adding a coordinate with a plain array."""
@@ -674,7 +674,7 @@ class TestCoordinateOperators:
         
         result = point + array
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [4, 6])
+        np.testing.assert_array_equal(result.coords, [4, 6])
 
     def test_coordinate_with_array_subtraction(self):
         """Test subtracting a plain array from coordinate."""
@@ -683,7 +683,7 @@ class TestCoordinateOperators:
         
         result = point - array
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [3, 4])
+        np.testing.assert_array_equal(result.coords, [3, 4])
 
     def test_right_addition_with_array(self):
         """Test right addition (array + coordinate)."""
@@ -729,7 +729,7 @@ class TestCoordinateOperators:
         repr_str = repr(point)
         
         assert "Point" in repr_str
-        assert "local_coords" in repr_str
+        assert "coords" in repr_str
 
     def test_equality_with_array(self):
         """Test equality comparison with plain array."""
@@ -745,7 +745,7 @@ class TestCoordinateOperators:
         # This should trigger __radd__
         result = 5 + point
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [6, 7])
+        np.testing.assert_array_equal(result.coords, [6, 7])
 
     def test_rsub_with_scalar(self):
         """Test right subtraction with scalar (scalar - coordinate)."""
@@ -754,7 +754,7 @@ class TestCoordinateOperators:
         # This should trigger __rsub__
         result = 10 - point
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [9, 8])
+        np.testing.assert_array_equal(result.coords, [9, 8])
 
     def test_rtruediv_with_scalar(self):
         """Test right division with scalar (scalar / coordinate)."""
@@ -763,7 +763,7 @@ class TestCoordinateOperators:
         # This should trigger __rtruediv__
         result = 8 / point
         assert isinstance(result, Coordinate)
-        np.testing.assert_array_equal(result.local_coords, [4, 2])
+        np.testing.assert_array_equal(result.coords, [4, 2])
 
 
 class TestPointAndVectorBehavior:
@@ -772,61 +772,61 @@ class TestPointAndVectorBehavior:
     def test_point_affected_by_translation(self):
         """Test that points are affected by translation."""
         frame = Frame(transform=translate2D(5, 3), parent=None)
-        point = Point(local_coords=np.array([1, 2]), frame=frame)
+        point = Point(coords=np.array([1, 2]), frame=frame)
         
         # When converting to identity frame, point should be translated
         identity_frame = Frame(transform=np.eye(3), parent=None)
         result = point.relative_to(identity_frame)
         
         expected = np.array([6, 5])
-        np.testing.assert_array_almost_equal(result.local_coords, expected)
+        np.testing.assert_array_almost_equal(result.coords, expected)
 
     def test_vector_unaffected_by_translation(self):
         """Test that vectors are unaffected by translation."""
         frame = Frame(transform=translate2D(5, 3), parent=None)
-        vector = Vector(local_coords=np.array([1, 2]), frame=frame)
+        vector = Vector(coords=np.array([1, 2]), frame=frame)
         
         # When converting to identity frame, vector should not be translated
         identity_frame = Frame(transform=np.eye(3), parent=None)
         result = vector.relative_to(identity_frame)
         
         expected = np.array([1, 2])
-        np.testing.assert_array_almost_equal(result.local_coords, expected)
+        np.testing.assert_array_almost_equal(result.coords, expected)
 
     def test_point_scaled_from_origin(self):
         """Test that points are scaled from origin."""
         frame = Frame(transform=scale2D(2, 2), parent=None)
-        point = Point(local_coords=np.array([3, 4]), frame=frame)
+        point = Point(coords=np.array([3, 4]), frame=frame)
         
         identity_frame = Frame(transform=np.eye(3), parent=None)
         result = point.relative_to(identity_frame)
         
         expected = np.array([6, 8])
-        np.testing.assert_array_almost_equal(result.local_coords, expected)
+        np.testing.assert_array_almost_equal(result.coords, expected)
 
     def test_vector_scaled(self):
         """Test that vectors are also scaled."""
         frame = Frame(transform=scale2D(2, 2), parent=None)
-        vector = Vector(local_coords=np.array([3, 4]), frame=frame)
+        vector = Vector(coords=np.array([3, 4]), frame=frame)
         
         identity_frame = Frame(transform=np.eye(3), parent=None)
         result = vector.relative_to(identity_frame)
         
         expected = np.array([6, 8])
-        np.testing.assert_array_almost_equal(result.local_coords, expected)
+        np.testing.assert_array_almost_equal(result.coords, expected)
 
     def test_point_and_vector_both_rotate(self):
         """Test that both points and vectors rotate the same way."""
         frame = Frame(transform=rotate2D(np.pi / 2), parent=None)
         identity_frame = Frame(transform=np.eye(3), parent=None)
         
-        point = Point(local_coords=np.array([1, 0]), frame=frame)
-        vector = Vector(local_coords=np.array([1, 0]), frame=frame)
+        point = Point(coords=np.array([1, 0]), frame=frame)
+        vector = Vector(coords=np.array([1, 0]), frame=frame)
         
         point_result = point.relative_to(identity_frame)
         vector_result = vector.relative_to(identity_frame)
         
         # Both should rotate the same
         expected = np.array([0, 1])
-        np.testing.assert_array_almost_equal(point_result.local_coords, expected)
-        np.testing.assert_array_almost_equal(vector_result.local_coords, expected)
+        np.testing.assert_array_almost_equal(point_result.coords, expected)
+        np.testing.assert_array_almost_equal(vector_result.coords, expected)

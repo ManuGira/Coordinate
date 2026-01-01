@@ -75,9 +75,9 @@ def draw_frame_axes(
     y_axis = Vector(np.array([0, 1]), frame=frame)
     
     # Convert to reference frame coordinates
-    origin_coords = origin.relative_to(reference_frame).local_coords
-    x_axis_coords = x_axis.relative_to(reference_frame).local_coords
-    y_axis_coords = y_axis.relative_to(reference_frame).local_coords
+    origin_coords = origin.relative_to(reference_frame).coords
+    x_axis_coords = x_axis.relative_to(reference_frame).coords
+    y_axis_coords = y_axis.relative_to(reference_frame).coords
 
     # Draw origin
     ax.plot(origin_coords[0], origin_coords[1], 'o', 
@@ -149,7 +149,7 @@ def draw_points(
         reference_frame = Frame()
     
     # Get point coordinates in reference frame
-    coords = [p.relative_to(reference_frame).local_coords for p in points]
+    coords = [p.relative_to(reference_frame).coords for p in points]
     
     xs = [c[0] for c in coords]
     ys = [c[1] for c in coords]
