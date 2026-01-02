@@ -11,7 +11,7 @@ def scale(scale_vector: ArrayLike) -> np.ndarray:
         scale_vector: Scale factors for each dimension [sx, sy, ...]
     
     Returns:
-        An (n+1)×(n+1) scaling matrix in homogeneous coordinates where n is the 
+        An (n+1)x(n+1) scaling matrix in homogeneous coordinates where n is the 
         length of scale_vector. The matrix scales each dimension by the corresponding 
         factor while preserving the homogeneous coordinate.
     """
@@ -30,7 +30,7 @@ def scale2D(sx: float, sy: float) -> np.ndarray:
         sy: Scale factor along the y-axis
     
     Returns:
-        A 3×3 scaling matrix in homogeneous coordinates:
+        A 3x3 scaling matrix in homogeneous coordinates:
             [[sx, 0,  0]
              [0,  sy, 0]
              [0,  0,  1]]
@@ -47,7 +47,7 @@ def scale3D(sx: float, sy: float, sz: float) -> np.ndarray:
         sz: Scale factor along the z-axis
     
     Returns:
-        A 4×4 scaling matrix in homogeneous coordinates:
+        A 4x4 scaling matrix in homogeneous coordinates:
             [[sx, 0,  0,  0]
              [0,  sy, 0,  0]
              [0,  0,  sz, 0]
