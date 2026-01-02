@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.0] - 2026-01-02
 ### Added
 - `Coordinate`: support for ArrayLike inputs (lists, tuples) for `coords` argument in addition to numpy arrays
 - `Coordinate`: support for DxN arrays inputs for `coords` argument where D is dimension and N is number of coordinates, allowing batch operations
