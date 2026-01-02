@@ -15,10 +15,10 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-Write-Host "`nRunning mypy..." -ForegroundColor Cyan
-uv run mypy .
+Write-Host "`nRunning ty..." -ForegroundColor Cyan
+uv run ty check .
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Mypy checks failed!" -ForegroundColor Red
+    Write-Host "Ty checks failed!" -ForegroundColor Red
     exit $LASTEXITCODE
 }
 
