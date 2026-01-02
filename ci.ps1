@@ -2,7 +2,7 @@
 # Run local CI checks
 
 Write-Host "Running tests..." -ForegroundColor Cyan
-uv run pytest tests
+uv run pytest tests --cov=src/coordinatus --cov-report=term-missing --cov-report=html
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Tests failed!" -ForegroundColor Red
     exit $LASTEXITCODE

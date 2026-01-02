@@ -175,6 +175,18 @@ class TestVectorInit:
 class TestCoordinateToAbsolute:
     """Tests for converting coordinates to absolute space."""
 
+    def test_coordinate_base_class_to_absolute(self):
+        """Test to_absolute with base Coordinate class (for coverage)."""
+        frame = Frame(transform=translate2D(5, 3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([1, 2]), frame=frame)
+        
+        result = coord.to_absolute()
+        
+        # Should work the same as Point
+        np.testing.assert_array_almost_equal(result.coords, [6, 5])
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+
     def test_to_global_no_parent(self):
         """Test to_absolute when frame has no parent (root frame)."""
         frame = Frame(transform=translate2D(5, 3), parent=None)
@@ -258,6 +270,19 @@ class TestCoordinateToAbsolute:
 
 class TestCoordinateToFrame:
     """Tests for converting coordinates between frames."""
+
+    def test_coordinate_base_class_relative_to(self):
+        """Test relative_to with base Coordinate class (for coverage)."""
+        frame_a = Frame(transform=translate2D(5, 0), parent=None)
+        frame_b = Frame(transform=translate2D(0, 3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([0, 0]), frame=frame_a)
+        
+        result = coord.relative_to(frame_b)
+        
+        # Should work the same as Point
+        np.testing.assert_array_almost_equal(result.coords, [5, -3])
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
 
     def test_to_system_same_system(self):
         """Test converting to the same frame."""
@@ -592,6 +617,136 @@ class TestCoordinateOperators:
         result = point * 2
         assert result.frame is frame
 
+
+class TestCoordinateBaseClassOperations:
+    """Tests for arithmetic operations on the base Coordinate class."""
+
+    def test_coordinate_base_class_addition(self):
+        """Test addition with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([1, 2]), frame=frame)
+        
+        result = coord + np.array([3, 4])
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [4, 6])
+
+    def test_coordinate_base_class_subtraction(self):
+        """Test subtraction with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([5, 7]), frame=frame)
+        
+        result = coord - np.array([1, 2])
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [4, 5])
+
+    def test_coordinate_base_class_multiplication(self):
+        """Test multiplication with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.VECTOR, coords=np.array([2, 3]), frame=frame)
+        
+        result = coord * 2
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.VECTOR
+        np.testing.assert_array_almost_equal(result.coords, [4, 6])
+
+    def test_coordinate_base_class_division(self):
+        """Test division with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([4, 6]), frame=frame)
+        
+        result = coord / 2
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [2, 3])
+
+    def test_coordinate_base_class_negation(self):
+        """Test negation with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.VECTOR, coords=np.array([1, -2]), frame=frame)
+        
+        result = -coord
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.VECTOR
+        np.testing.assert_array_almost_equal(result.coords, [-1, 2])
+
+    def test_coordinate_base_class_abs(self):
+        """Test absolute value with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([-3, 4]), frame=frame)
+        
+        result = abs(coord)
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [3, 4])
+
+    def test_coordinate_base_class_radd(self):
+        """Test right addition with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([1, 2]), frame=frame)
+        
+        # When left operand is a Python scalar (not numpy), __radd__ is called
+        result = 5 + coord
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [6, 7])
+
+    def test_coordinate_base_class_rsub(self):
+        """Test right subtraction with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([1, 2]), frame=frame)
+        
+        # When left operand is a Python scalar (not numpy), __rsub__ is called
+        result = 10 - coord
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [9, 8])
+
+    def test_coordinate_base_class_rmul(self):
+        """Test right multiplication with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.VECTOR, coords=np.array([2, 3]), frame=frame)
+        
+        result = 2 * coord
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.VECTOR
+        np.testing.assert_array_almost_equal(result.coords, [4, 6])
+
+    def test_coordinate_base_class_rtruediv(self):
+        """Test right division with base Coordinate class."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord = Coordinate(kind=CoordinateKind.POINT, coords=np.array([2, 4]), frame=frame)
+        
+        # When left operand is a Python scalar (not numpy), __rtruediv__ is called
+        result = 8 / coord
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [4, 2])
+
+    def test_coordinate_base_class_coord_addition(self):
+        """Test adding two base Coordinate instances."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        coord1 = Coordinate(kind=CoordinateKind.POINT, coords=np.array([1, 2]), frame=frame)
+        coord2 = Coordinate(kind=CoordinateKind.POINT, coords=np.array([3, 4]), frame=frame)
+        
+        result = coord1 + coord2
+        
+        assert isinstance(result, Coordinate)
+        assert result.kind == CoordinateKind.POINT
+        np.testing.assert_array_almost_equal(result.coords, [4, 6])
+
+
     def test_vector_operations(self):
         """Test operations on vectors preserve vector type."""
         vector = Vector([1, 0])
@@ -830,3 +985,149 @@ class TestPointAndVectorBehavior:
         expected = np.array([0, 1])
         np.testing.assert_array_almost_equal(point_result.coords, expected)
         np.testing.assert_array_almost_equal(vector_result.coords, expected)
+
+
+class TestTypePreservation:
+    """Tests to ensure Point and Vector types are preserved through operations."""
+
+    def test_point_to_absolute_preserves_type(self):
+        """Test that Point.to_absolute() returns a Point instance."""
+        frame = Frame(transform=translate2D(5, 3), parent=None)
+        point = Point(coords=np.array([1, 2]), frame=frame)
+        
+        result = point.to_absolute()
+        
+        assert isinstance(result, Point), f"Expected Point but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [6, 5])
+
+    def test_vector_to_absolute_preserves_type(self):
+        """Test that Vector.to_absolute() returns a Vector instance."""
+        frame = Frame(transform=translate2D(5, 3), parent=None)
+        vector = Vector(coords=np.array([1, 0]), frame=frame)
+        
+        result = vector.to_absolute()
+        
+        assert isinstance(result, Vector), f"Expected Vector but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [1, 0])
+
+    def test_point_relative_to_preserves_type(self):
+        """Test that Point.relative_to() returns a Point instance."""
+        frame_a = Frame(transform=translate2D(5, 0), parent=None)
+        frame_b = Frame(transform=translate2D(0, 3), parent=None)
+        point = Point(coords=np.array([0, 0]), frame=frame_a)
+        
+        result = point.relative_to(frame_b)
+        
+        assert isinstance(result, Point), f"Expected Point but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [5, -3])
+
+    def test_vector_relative_to_preserves_type(self):
+        """Test that Vector.relative_to() returns a Vector instance."""
+        frame_a = Frame(transform=translate2D(5, 0), parent=None)
+        frame_b = Frame(transform=translate2D(0, 3), parent=None)
+        vector = Vector(coords=np.array([1, 0]), frame=frame_a)
+        
+        result = vector.relative_to(frame_b)
+        
+        assert isinstance(result, Vector), f"Expected Vector but got {type(result)}"
+
+    def test_point_addition_preserves_type(self):
+        """Test that Point + value returns a Point instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        point = Point(coords=np.array([1, 2]), frame=frame)
+        
+        result = point + np.array([3, 4])
+        
+        assert isinstance(result, Point), f"Expected Point but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [4, 6])
+
+    def test_vector_addition_preserves_type(self):
+        """Test that Vector + value returns a Vector instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        vector = Vector(coords=np.array([1, 2]), frame=frame)
+        
+        result = vector + np.array([3, 4])
+        
+        assert isinstance(result, Vector), f"Expected Vector but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [4, 6])
+
+    def test_point_multiplication_preserves_type(self):
+        """Test that Point * scalar returns a Point instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        point = Point(coords=np.array([1, 2]), frame=frame)
+        
+        result = point * 2
+        
+        assert isinstance(result, Point), f"Expected Point but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [2, 4])
+
+    def test_vector_multiplication_preserves_type(self):
+        """Test that Vector * scalar returns a Vector instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        vector = Vector(coords=np.array([1, 2]), frame=frame)
+        
+        result = vector * 2
+        
+        assert isinstance(result, Vector), f"Expected Vector but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [2, 4])
+
+    def test_point_negation_preserves_type(self):
+        """Test that -Point returns a Point instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        point = Point(coords=np.array([1, 2]), frame=frame)
+        
+        result = -point
+        
+        assert isinstance(result, Point), f"Expected Point but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [-1, -2])
+
+    def test_vector_negation_preserves_type(self):
+        """Test that -Vector returns a Vector instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        vector = Vector(coords=np.array([1, 2]), frame=frame)
+        
+        result = -vector
+        
+        assert isinstance(result, Vector), f"Expected Vector but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [-1, -2])
+
+    def test_point_division_preserves_type(self):
+        """Test that Point / scalar returns a Point instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        point = Point(coords=np.array([4, 6]), frame=frame)
+        
+        result = point / 2
+        
+        assert isinstance(result, Point), f"Expected Point but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [2, 3])
+
+    def test_vector_division_preserves_type(self):
+        """Test that Vector / scalar returns a Vector instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        vector = Vector(coords=np.array([4, 6]), frame=frame)
+        
+        result = vector / 2
+        
+        assert isinstance(result, Vector), f"Expected Vector but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [2, 3])
+
+    def test_point_abs_preserves_type(self):
+        """Test that abs(Point) returns a Point instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        point = Point(coords=np.array([-1, -2]), frame=frame)
+        
+        result = abs(point)
+        
+        assert isinstance(result, Point), f"Expected Point but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [1, 2])
+
+    def test_vector_abs_preserves_type(self):
+        """Test that abs(Vector) returns a Vector instance."""
+        frame = Frame(transform=np.eye(3), parent=None)
+        vector = Vector(coords=np.array([-1, -2]), frame=frame)
+        
+        result = abs(vector)
+        
+        assert isinstance(result, Vector), f"Expected Vector but got {type(result)}"
+        np.testing.assert_array_almost_equal(result.coords, [1, 2])
+

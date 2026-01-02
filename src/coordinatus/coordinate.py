@@ -110,6 +110,28 @@ class Coordinate:
         self.coords = np.asarray(coords)
         self.frame = frame if frame is not None else Frame()
 
+    def _make_new(self, coords: np.ndarray, frame: Optional[Frame] = None) -> 'Coordinate':
+        """Create a new coordinate of the same type as self.
+        
+        Helper method to handle the different constructors between Coordinate and its subclasses.
+        Point/Vector don't take 'kind' argument, but Coordinate does.
+        
+        Args:
+            coords: The coordinate values.
+            frame: The coordinate frame. If not provided, uses self.frame.
+                  Pass Frame() explicitly for identity frame.
+        
+        Returns:
+            A new instance of the same type as self with the given coords and frame.
+        """
+        if frame is None:
+            frame = self.frame
+        if type(self) is Coordinate:
+            return Coordinate(kind=self.kind, coords=coords, frame=frame)
+        else:
+            # Point and Vector constructors don't take 'kind'
+            return type(self)(coords=coords, frame=frame)  # type: ignore[call-arg]
+
     def __array__(self, dtype=None):
         """Return the underlying numpy array for numpy operations."""
         if dtype is None:
@@ -141,12 +163,12 @@ class Coordinate:
             new_coords = self.coords + other.coords
         else:
             new_coords = self.coords + other
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __radd__(self, other):
         """Right addition."""
         new_coords = self.coords + other
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __sub__(self, other):
         """Subtract coordinates or arrays."""
@@ -156,12 +178,12 @@ class Coordinate:
             new_coords = self.coords - other.coords
         else:
             new_coords = self.coords - other
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __rsub__(self, other):
         """Right subtraction."""
         new_coords = other - self.coords
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __mul__(self, other):
         """Multiply coordinates or arrays."""
@@ -171,12 +193,12 @@ class Coordinate:
             new_coords = self.coords * other.coords
         else:
             new_coords = self.coords * other
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __rmul__(self, other):
         """Right multiplication."""
         new_coords = self.coords * other
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __truediv__(self, other):
         """Divide coordinates or arrays."""
@@ -186,22 +208,22 @@ class Coordinate:
             new_coords = self.coords / other.coords
         else:
             new_coords = self.coords / other
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __rtruediv__(self, other):
         """Right division."""
         new_coords = other / self.coords
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __neg__(self):
         """Negate coordinates."""
         new_coords = -self.coords
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     def __abs__(self):
         """Absolute value of coordinates."""
         new_coords = np.abs(self.coords)
-        return Coordinate(kind=self.kind, coords=new_coords, frame=self.frame)
+        return self._make_new(new_coords)
 
     # Comparison operators
     def __eq__(self, other):
@@ -232,7 +254,7 @@ class Coordinate:
         """
         absolute_transform = self.frame.compute_absolute_transform()
         absolute_coords = transform_coordinate(absolute_transform, self.coords, self.kind)
-        return Coordinate(coords=absolute_coords, kind=self.kind, frame=None)
+        return self._make_new(absolute_coords, frame=Frame())
         
     def relative_to(self, target_frame: Frame) -> 'Coordinate':
         """Converts this coordinate to a different coordinate frame.
@@ -256,7 +278,7 @@ class Coordinate:
         # Inverse transform from absolute to target frame
         relative_transform = self.frame.compute_relative_transform_to(target_frame)
         relative_coords = transform_coordinate(relative_transform, self.coords, self.kind)
-        return Coordinate(coords=relative_coords, kind=self.kind, frame=target_frame)
+        return self._make_new(relative_coords, frame=target_frame)
 
 
 class Point(Coordinate):
