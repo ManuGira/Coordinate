@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .translate import translate2D
+from .translate import translate, translate2D, translate3D
 from .rotate import rotate2D
 from .scale import scale2D, shear2D
 from .dimension import (
