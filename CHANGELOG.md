@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0.dev1]
+### Added
+
+### Changed
+- Decrease numpy version >=2.4.0 to >=2.3.5 to allow compatibility with environments where numpy 2.4.0 is not yet available.
+
 ## [0.3.0] - 2026-01-02
 ### Added
 - `Coordinate`: support for ArrayLike inputs (lists, tuples) for `coords` argument in addition to numpy arrays
